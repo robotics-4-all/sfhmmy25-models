@@ -1,0 +1,108 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// Goal<EntityAttrStream> Goal_1
+//     stream: AppVariables.value: [2, 5, 9, 13, 20]
+//     strategy: ALL_ORDERED
+// end
+
+Goal<EntityPyCondition> CP_1
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 5"
+end
+
+Goal<EntityPyCondition> CP_2
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 7"
+end
+
+Goal<EntityPyCondition> CP_3
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 9"
+end
+
+Goal<EntityPyCondition> CP_4
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 11"
+end
+
+
+Goal<Complex> Checkpoints
+    goals:
+        - CP_1
+        - CP_2
+        - CP_3
+        - CP_4
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Initialization_X
+    condition:
+        "AppVariables.name == 'x' and int(AppVariables.value) == 78"
+end
+
+Goal<EntityPyCondition> Primes
+    condition:
+        "AppVariables.name == 'primes' and AppVariables.value == [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73]"
+end
+
+Goal<EntityPyCondition> Result
+    condition:
+        "AppVariables.name == 'result' and float(AppVariables.value) == 33.904761904761905"
+end
+
+Scenario S1_T1
+    goals:
+        - Initialization_X
+        - Checkpoints
+        - Primes
+        - Result
+    concurrent: False
+end

@@ -1,0 +1,72 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Initial_Var_X_Correct
+    condition:
+        "AppVariables.name == 'x' and AppVariables.value == [6, 9, 14, 56, 99, 145, 198, 3, 93, 22, 245, 798]"
+end
+
+Goal<EntityPyCondition> Sum_Odd_Correct
+    condition:
+        "AppVariables.name == 'result' and AppVariables.value[0] == 594"
+end
+
+Goal<EntityPyCondition> Sum_Even_Correct
+    condition:
+        "AppVariables.name == 'result' and AppVariables.value[1] == 1094"
+end
+
+Scenario S1_T1
+    goals:
+        - Initial_Var_X_Correct
+        - Sum_Odd_Correct
+        - Sum_Even_Correct
+    concurrent: True
+end

@@ -1,0 +1,86 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+
+Goal<EntityPyCondition> Result_Correct
+    condition:
+        "AppVariables.name == 'result' and AppVariables.value == 1"
+end
+
+Goal<EntityPyCondition> XY_Correct
+    condition:
+        "AppVariables.name == 'xy' and AppVariables.value == [1,2,3,4,5,6,7,8,9]"
+end
+
+Goal<EntityPyCondition> X_Initialized
+    condition:
+        "AppVariables.name == 'x' and AppVariables.value ==  [9, 5, 7, 1, 3]"
+end
+
+Goal<EntityPyCondition> Y_Initialized
+    condition:
+        "AppVariables.name == 'y' and AppVariables.value ==  [8, 2, 6, 4]"
+end
+
+Goal<Complex> Initializations
+    goals:
+        - X_Initialized
+        - Y_Initialized
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+
+Scenario S1_T1
+    goals:
+        - Initializations
+        - XY_Correct
+        - Result_Correct
+    concurrent: True
+end

@@ -1,0 +1,110 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+
+Goal<EntityPyCondition> Initialization_X
+    condition:
+        "AppVariables.name == 'x' and AppVariables.value == 9678769"
+end
+
+Goal<EntityPyCondition> Initialization_Y
+    condition:
+        "AppVariables.name == 'y' and AppVariables.value == 5566216655"
+end
+
+Goal<Complex> Initializations
+    goals:
+        - Initialization_X
+        - Initialization_Y
+    strategy: ALL_ACCOMPLISHED
+end
+
+
+Goal<EntityPyCondition> Result_X
+    condition:
+        "AppVariables.name == 'x_result' and bool(AppVariables.value) == True"
+end
+
+Goal<EntityPyCondition> Result_Y
+    condition:
+        "AppVariables.name == 'y_result' and bool(AppVariables.value) == False"
+end
+
+Goal<EntityPyCondition> Length_X
+    condition:
+        "AppVariables.name == 'x_length' and AppVariables.value == 7"
+end
+
+Goal<EntityPyCondition> Length_Y
+    condition:
+        "AppVariables.name == 'y_length' and AppVariables.value == 10"
+end
+
+Goal<Complex> Results
+    goals:
+        - Result_X
+        - Result_Y
+    strategy: ALL_ACCOMPLISHED
+end
+
+Goal<Complex> Lengths
+    goals:
+        - Length_X
+        - Length_Y
+    strategy: ALL_ACCOMPLISHED
+end
+
+Scenario S1_T1
+    goals:
+        - Initializations
+        // - Lengths
+        - Results
+    concurrent: True
+end

@@ -1,0 +1,78 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Sum_1
+    condition:
+        "AppVariables.name == 'sum_1' and AppVariables.value == 5050"
+end
+
+Goal<EntityPyCondition> Sum_2
+    condition:
+        "AppVariables.name == 'sum_2' and AppVariables.value == 15050"
+end
+
+Goal<EntityPyCondition> Sum_3
+    condition:
+        "AppVariables.name == 'sum_3' and AppVariables.value == 25050"
+end
+
+Goal<EntityPyCondition> Total_Sum
+    condition:
+        "AppVariables.name == 'total_sum' and AppVariables.value == 45150"
+end
+
+Scenario S1_T1
+    goals:
+        - Sum_1
+        - Sum_2
+        - Sum_3
+        - Total_Sum
+    concurrent: True
+end

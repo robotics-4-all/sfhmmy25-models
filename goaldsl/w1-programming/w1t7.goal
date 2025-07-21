@@ -1,0 +1,102 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// Goal<EntityAttrStream> Goal_1
+//     stream: AppVariables.value: [2, 5, 9, 13, 20]
+//     strategy: ALL_ORDERED
+// end
+
+Goal<EntityPyCondition> Counter_CP_1
+    condition:
+        "AppVariables.name == 'i' and AppVariables.value == 2"
+end
+
+Goal<EntityPyCondition> Counter_CP_2
+    condition:
+        "AppVariables.name == 'i' and AppVariables.value == 5"
+end
+
+Goal<EntityPyCondition> Counter_CP_3
+    condition:
+        "AppVariables.name == 'i' and AppVariables.value == 9"
+end
+
+Goal<EntityPyCondition> Counter_CP_4
+    condition:
+        "AppVariables.name == 'i' and AppVariables.value == 13"
+end
+
+Goal<EntityPyCondition> Counter_CP_5
+    condition:
+        "AppVariables.name == 'i' and AppVariables.value == 20"
+end
+
+Goal<Complex> Counter_Checkpoints
+    goals:
+        - Counter_CP_1
+        - Counter_CP_2
+        - Counter_CP_3
+        - Counter_CP_4
+        - Counter_CP_5
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Capital
+    condition:
+        "AppVariables.name == 'capital' and AppVariables.value >= 1269.734648531914"
+        // "AppVariables.name == 'capital' and AppVariables.value == 1269.7346485319142"
+end
+
+Scenario S1_T1
+    goals:
+        - Counter_Checkpoints
+        - Capital
+    concurrent: False
+end

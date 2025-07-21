@@ -1,0 +1,83 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// Goal<EntityAttrStream> Goal_1
+//     stream: AppVariables.value: [2, 5, 9, 13, 20]
+//     strategy: ALL_ORDERED
+// end
+
+Goal<EntityPyCondition> Sum_CP_1
+    condition:
+        "AppVariables.name == 'sum' and AppVariables.value == 1"
+end
+
+Goal<Complex> Checkpoints
+    goals:
+        - Sum_CP_1
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Initial_XX
+    condition:
+        "AppVariables.name == 'xx' and AppVariables.value == 2646798"
+end
+
+Goal<EntityPyCondition> Result
+    condition:
+        "AppVariables.name == 'result' and AppVariables.value == 1"
+end
+
+Scenario S1_T1
+    goals:
+        - Initial_XX
+        // - Checkpoints
+        - Result
+    concurrent: False
+end

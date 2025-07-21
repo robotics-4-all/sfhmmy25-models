@@ -1,0 +1,78 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Var_A_Correct
+    condition:
+        "AppVariables.name == 'a' and AppVariables.value == 148"
+end
+
+Goal<EntityPyCondition> Var_B_Correct
+    condition:
+        "AppVariables.name == 'b' and AppVariables.value == 43"
+end
+
+Goal<EntityPyCondition> Var_C_Correct
+    condition:
+        "AppVariables.name == 'c' and AppVariables.value == 172"
+end
+
+Goal<Complex> Initial_Variables_Correct
+    goals:
+        - Var_A_Correct
+        - Var_B_Correct
+    strategy: ALL_ACCOMPLISHED
+end
+
+Scenario S1_T1
+    goals:
+        - Initial_Variables_Correct
+        - Var_C_Correct
+    concurrent: False
+end

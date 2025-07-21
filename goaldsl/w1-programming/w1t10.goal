@@ -1,0 +1,139 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> X_Variable_Check
+    condition:
+        "AppVariables.name == 'x' and AppVariables.value == 89456"
+end
+
+Goal<EntityPyCondition> TempSum_CP_1
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 222"
+
+end
+
+Goal<EntityPyCondition> TempSum_CP_2
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 12"
+end
+
+Goal<EntityPyCondition> TempSum_CP_3
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 5"
+end
+
+Goal<EntityPyCondition> TempSum_CP_4
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 25"
+end
+
+Goal<EntityPyCondition> TempSum_CP_5
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 29"
+end
+
+Goal<EntityPyCondition> TempSum_CP_6
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 85"
+end
+
+Goal<EntityPyCondition> TempSum_CP_7
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 89"
+end
+
+Goal<EntityPyCondition> TempSum_CP_8
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 145"
+end
+
+Goal<EntityPyCondition> TempSum_CP_9
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 42"
+end
+
+Goal<EntityPyCondition> TempSum_CP_10
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 20"
+end
+
+Goal<EntityPyCondition> TempSum_CP_11
+    condition:
+        "AppVariables.name == 'tmp_sum' and AppVariables.value == 4"
+end
+
+Goal<EntityPyCondition> Result_Correct
+    condition:
+        "AppVariables.name == 'result' and int(AppVariables.value) == 0"
+end
+
+Goal<Complex> Checkpoints
+    goals:
+        - TempSum_CP_1
+        - TempSum_CP_2
+        - TempSum_CP_3
+        - TempSum_CP_4
+        - TempSum_CP_5
+        - TempSum_CP_6
+        - TempSum_CP_7
+        - TempSum_CP_8
+        - TempSum_CP_9
+        - TempSum_CP_10
+        - TempSum_CP_11
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+
+Scenario S1_T1
+    goals:
+        - Checkpoints
+        - Result_Correct
+    concurrent: False
+end

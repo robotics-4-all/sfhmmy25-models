@@ -1,0 +1,91 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Counter_CP_1
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 10"
+end
+
+Goal<EntityPyCondition> Counter_CP_2
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 50"
+end
+
+Goal<EntityPyCondition> Counter_CP_3
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 90"
+end
+
+Goal<EntityPyCondition> Counter_CP_4
+    condition:
+        "AppVariables.name == 'i' and int(AppVariables.value) == 100"
+end
+
+Goal<EntityPyCondition> CheckSum_5
+    condition:
+        "AppVariables.name == 'sum' and int(AppVariables.value) == 5050"
+end
+
+Goal<Complex> Counter_Checkpoints
+    goals:
+        - Counter_CP_1
+        - Counter_CP_2
+        - Counter_CP_3
+        - Counter_CP_4
+    strategy: ALL_ACCOMPLISHED
+end
+
+
+Scenario S1_T1
+    goals:
+        - Counter_Checkpoints
+        - CheckSum_5
+    concurrent: True
+end
