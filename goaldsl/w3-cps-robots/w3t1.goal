@@ -1,0 +1,125 @@
+Metadata
+    name: aJvep
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_areaAlarm_54_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_54.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_56_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_56.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_57_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_57.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity Supercar_Pose
+    type: sensor
+    uri: "streamsim.{UID}.2fast4you.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity supercar_crash
+    type: sensor
+    uri: "streamsim.{UID}.2fast4you.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity Supercar_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.2fast4you.actuator.motion.twist.2fast4you_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> AreaAlarm_Triggered
+    condition:
+        "len(sn_areaAlarm_54_data.value) > 0 or len(sn_areaAlarm_56_data.value) > 0 or len(sn_areaAlarm_57_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityStateChange> Supercar_Crash
+    entity: supercar_crash
+end
+
+Goal<WaypointTrajectory> Waypoints
+    entity: Supercar_Pose
+    points: [Point3D(70, 46.66, 0), Point3D(70, 58, 0)]
+    maxDeviation: 0.5
+end
+
+// ----------------------------------------------------------------
+
+Scenario W3_T1
+    goals:
+        - Waypoints
+    fatals:
+        - AreaAlarm_Triggered
+        - Supercar_Crash
+    concurrent: False
+end

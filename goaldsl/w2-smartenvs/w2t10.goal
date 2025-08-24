@@ -1,0 +1,121 @@
+Metadata
+    name: aDNwM
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_gas_28_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.gas.sn_gas_28.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity gn_human_29_pose
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.gn_human_29.pose"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity gn_human_29_properties
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.gn_human_29.properties"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - move: bool
+        - sound: bool
+        - lang: str
+        - range: float
+        - speech: str
+        - emotion: str
+        - gender: str
+        - age: float
+end
+
+Entity gn_human_30_pose
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.gn_human_30.pose"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity gn_human_30_properties
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.gn_human_30.properties"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - move: bool
+        - sound: bool
+        - lang: str
+        - range: float
+        - speech: str
+        - emotion: str
+        - gender: str
+        - age: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Humans_Detected
+    condition:
+        "AppVariables.name == 'humans' and AppVariables.value == 2"
+end
+
+Scenario Week_2_Task_10
+    goals:
+        - Humans_Detected
+    concurrent: False
+end

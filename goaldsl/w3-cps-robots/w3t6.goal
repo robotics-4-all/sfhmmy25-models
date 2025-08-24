@@ -1,0 +1,246 @@
+Metadata
+    name: kfGGM
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_temperature_113_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_113.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_temperature_114_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_114.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_temperature_115_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_115.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_temperature_116_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_116.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_temperature_117_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_117.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_temperature_118_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_118.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity whitehat_pose
+    type: sensor
+    uri: "streamsim.{UID}.whitehat.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity whitehat_crash
+    type: sensor
+    uri: "streamsim.{UID}.whitehat.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity whitehat_env_data
+    type: sensor
+    uri: "streamsim.{UID}.whitehat.sensor.env.whitehat_env.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - data: dict
+end
+
+Entity whitehat_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.whitehat.actuator.motion.twist.whitehat_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityStateChange> Whitehat_Crash
+    entity: whitehat_crash
+end
+
+Goal<CircularArea> Reached_SN_Temperature_116
+    center: Point3D(47.16, 50, 0)
+    radius: 3.5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<CircularArea> Reached_SN_Temperature_113
+    center: Point3D(60.78, 36.36, 0)
+    radius: 5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<CircularArea> Reached_SN_Temperature_118
+    center: Point3D(60, 3, 0)
+    radius: 5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<CircularArea> Monitored_SN_Temperature_115
+    center: Point3D(26.83, 49.92, 0)
+    radius: 5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<CircularArea> Monitored_SN_Temperature_117
+    center: Point3D(26.6, 3.4, 0)
+    radius: 5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<CircularArea> Monitored_SN_Temperature_114
+    center: Point3D(66.52, 16.83, 0)
+    radius: 5
+    tag: ENTER
+    // timeConstraints:
+    //     - FOR_TIME(5)
+end
+
+Goal<EntityPyCondition> Counter_Increment
+    condition:
+        "AppVariables.name == 'highjacked' and AppVariables.value > 0"
+    // timeConstraints:
+    //     - FROM_GOAL_START(>5)
+end
+
+Goal<Complex> Checkpoint_A
+    goals:
+        - Reached_SN_Temperature_116
+        - Counter_Increment
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Checkpoint_B
+    goals:
+        - Reached_SN_Temperature_113
+        - Counter_Increment
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Checkpoint_C
+    goals:
+        - Reached_SN_Temperature_118
+        - Counter_Increment
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Number_of_Hijacked_Devices
+    condition:
+        "AppVariables.name == 'highjacked' and AppVariables.value == 3"
+end
+
+Goal<Complex> Checkpoints
+    goals:
+        - Checkpoint_A
+        - Checkpoint_B
+        - Checkpoint_C
+        - Monitored_SN_Temperature_115
+        - Monitored_SN_Temperature_114
+        - Monitored_SN_Temperature_117
+    strategy: ALL_ACCOMPLISHED
+end
+
+Scenario W3_T6
+    goals:
+        - Number_of_Hijacked_Devices -> 0.2
+        - Checkpoints -> 0.8
+    fatals:
+        - Whitehat_Crash
+    concurrent: True
+end

@@ -1,0 +1,324 @@
+Metadata
+    name: XkqLS
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity freedom_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.freedom.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity ef_light_67_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.ef_light_67.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: dict
+end
+
+Entity ef_light_68_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.ef_light_68.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: dict
+end
+
+Entity gn_robot_69_pose
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_69.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity gn_robot_69_crash
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_69.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity gn_robot_69_camera_detect
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_69.sensor.visual.camera.gn_robot_69_camera.detection"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - detection: dict  // {qr: {value: str}}
+end
+
+Entity gn_robot_69_leds_get
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_69.actuator.visual.leds.gn_robot_69_leds.state"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity freedom_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.freedom.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity ef_light_67_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.ef_light_67.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity ef_light_68_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.ef_light_68.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity gn_robot_69_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.gn_robot_69.actuator.motion.twist.gn_robot_69_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity gn_robot_69_leds_set
+    type: actuator
+    uri: "streamsim.{UID}.gn_robot_69.actuator.visual.leds.gn_robot_69_leds.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityStateChange> QR_Code_Detected
+    entity: gn_robot_69_camera_detect
+end
+
+Goal<EntityPyCondition> QR_Words_Found
+    condition:
+        "AppVariables.name == 'unique' and AppVariables.value != ['charlie', 'foxtrot', 'tango', 'zulu'] and sorted(AppVariables.value) == sorted(['charlie', 'foxtrot', 'tango', 'zulu'])"
+    // timeConstraints:
+    //     - FROM_GOAL_START(<130)
+end
+
+Goal<EntityPyCondition> Charlie_QR_Detected
+    condition:
+        "gn_robot_69_camera_detect.detection['qr']['value'] == 'charlie'"
+end
+
+Goal<EntityPyCondition> Foxtrot_QR_Detected
+    condition:
+        "gn_robot_69_camera_detect.detection['qr']['value'] == 'foxtrot'"
+end
+
+Goal<EntityPyCondition> Tango_QR_Detected
+    condition:
+        "gn_robot_69_camera_detect.detection['qr']['value'] == 'tango'"
+end
+
+Goal<EntityPyCondition> Zulu_QR_Detected
+    condition:
+        "gn_robot_69_camera_detect.detection['qr']['value'] == 'zulu'"
+end
+
+Goal<EntityPyCondition> QR_Words_Sorted
+    condition:
+        "AppVariables.name == 'unique' and AppVariables.value == ['charlie', 'foxtrot', 'tango', 'zulu']"
+    // timeConstraints:
+    //     - FROM_GOAL_START(<130)
+end
+
+Goal<EntityStateChange> Robot_Crash
+    entity: gn_robot_69_crash
+end
+
+Goal<Position> Reach_Position_AppleTrees1
+    entity: gn_robot_69_pose
+    position: Point3D(50.56, 7.08, 0)
+    maxDeviation: 1
+end
+
+Goal<Position> Reach_Position_Cows2
+    entity: gn_robot_69_pose
+    position: Point3D(66.11, 38.62, 0)
+    maxDeviation: 1
+end
+
+Goal<CircularArea> Reach_QR_60
+    center: Point3D(3.87, 34.65, 0)
+    radius: 10
+    tag: ENTER
+end
+
+Goal<CircularArea> Reach_QR_61
+    center: Point3D(55.35, 27.21, 0)
+    radius: 5
+    tag: ENTER
+end
+
+Goal<EntityPyCondition> Tango_QR_Added_to_List
+    condition:
+        "AppVariables.name == 'unique' and 'tango' in AppVariables.value"
+end
+
+Goal<EntityPyCondition> Charlie_QR_Added_to_List
+    condition:
+        "AppVariables.name == 'unique' and 'charlie' in AppVariables.value"
+end
+
+Goal<EntityPyCondition> Foxtrot_QR_Added_to_List
+    condition:
+        "AppVariables.name == 'unique' and 'foxtrot' in AppVariables.value"
+end
+
+Goal<EntityPyCondition> Zulu_QR_Added_to_List
+    condition:
+        "AppVariables.name == 'unique' and 'zulu' in AppVariables.value"
+end
+
+Goal<Complex> QR_58_Detected_Correct
+    goals:
+        // - Reach_Position_AppleTrees1
+        // - QR_Code_Detected
+        - Tango_QR_Detected
+        - Tango_QR_Added_to_List
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> QR_59_Detected_Correct
+    goals:
+        // - Reach_Position_Cows2
+        // - QR_Code_Detected
+        - Charlie_QR_Detected
+        - Charlie_QR_Added_to_List
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> QR_60_Detected_Correct
+    goals:
+        // - Reach_QR_60
+        // - QR_Code_Detected
+        - Foxtrot_QR_Detected
+        - Foxtrot_QR_Added_to_List
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> QR_61_Detected_Correct
+    goals:
+        // - Reach_QR_61
+        // - QR_Code_Detected
+        - Zulu_QR_Detected
+        - Zulu_QR_Added_to_List
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Freedom_Word_A
+    condition:
+        "freedom_set.state == 'charlie'"
+end
+
+Goal<EntityPyCondition> Freedom_Word_B
+    condition:
+        "freedom_set.state == 'zulu'"
+end
+
+Goal<Complex> Freedom_Key_Words_Correct
+    goals:
+        - Freedom_Word_A
+        - Freedom_Word_B
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+// ----------------------------------------------------------------
+
+Scenario W3_T5
+    goals:
+        - QR_58_Detected_Correct
+        - QR_59_Detected_Correct
+        - QR_60_Detected_Correct
+        - QR_61_Detected_Correct
+        - QR_Words_Sorted
+        - Freedom_Key_Words_Correct
+    fatals:
+        - Robot_Crash
+    concurrent: True
+end

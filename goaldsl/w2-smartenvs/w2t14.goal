@@ -1,0 +1,335 @@
+Metadata
+    name: KbQNL
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity linear_1_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.linear_1.data"
+    source: LocalRedis
+    freq: 5.0
+    attributes:
+        - value: float
+end
+
+Entity linear_4_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.linear_4.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity linear_2_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.linear_2.data"
+    source: LocalRedis
+    freq: 2.0
+    attributes:
+        - value: float
+end
+
+Entity area_5_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.area_5.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity area_6_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.area_6.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity lamp_1_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_1.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_2_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_2.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_3_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_3.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_4_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp-4.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_5_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_5.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity tesla_pose
+    type: sensor
+    uri: "streamsim.{UID}.tesla.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity tesla_crash
+    type: sensor
+    uri: "streamsim.{UID}.tesla.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity lamp_1_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_1.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_2_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_2.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_3_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_3.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_4_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp-4.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity lamp_5_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.lamp_5.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity tesla_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.tesla.actuator.motion.twist.tesla_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> Linear_1_Reached
+    condition:
+        "len(linear_1_data.value) > 0 and linear_1_data.value[0] == 'tesla'"
+end
+
+Goal<EntityPyCondition> Lamp_1_Open_For_10_Seconds
+    condition:
+        "lamp_1_set.luminosity > 0"
+    timeConstraints:
+        - FOR_TIME(10)
+end
+
+Goal<Complex> Checkpoint_1
+    goals:
+        - Linear_1_Reached
+        - Lamp_1_Open_For_10_Seconds
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Linear_2_Reached
+    condition:
+        "len(linear_2_data.value) > 0 and linear_2_data.value[0] == 'tesla'"
+end
+
+Goal<EntityPyCondition> Lamp_2_Open_For_10_Seconds
+    condition:
+        "lamp_2_set.luminosity > 0"
+    timeConstraints:
+        - FOR_TIME(10)
+end
+
+Goal<Complex> Checkpoint_2
+    goals:
+        - Linear_2_Reached
+        - Lamp_2_Open_For_10_Seconds
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Linear_3_Reached
+    condition:
+        "len(linear_4_data.value) > 0 and linear_4_data.value[0] == 'tesla'"
+end
+
+Goal<EntityPyCondition> Lamp_3_Open_For_10_Seconds
+    condition:
+        "lamp_3_set.luminosity > 0"
+    timeConstraints:
+        - FOR_TIME(10)
+end
+
+Goal<Complex> Checkpoint_3
+    goals:
+        - Linear_3_Reached
+        - Lamp_3_Open_For_10_Seconds
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Area_1_Reached
+    condition:
+        "len(area_5_data.value) > 0 and area_5_data.value[0] == 'tesla'"
+end
+
+Goal<EntityPyCondition> Lamp_4_Open_For_10_Seconds
+    condition:
+        "lamp_4_set.luminosity > 0"
+    timeConstraints:
+        - FOR_TIME(10)
+end
+
+Goal<Complex> Checkpoint_4
+    goals:
+        - Area_1_Reached
+        - Lamp_4_Open_For_10_Seconds
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityPyCondition> Area_2_Reached
+    condition:
+        "len(area_6_data.value) > 0 and area_6_data.value[0] == 'tesla'"
+end
+
+Goal<EntityPyCondition> Lamp_5_Open_For_10_Seconds
+    condition:
+        "lamp_5_set.luminosity > 0"
+    timeConstraints:
+        - FOR_TIME(10)
+end
+
+Goal<Complex> Checkpoint_5
+    goals:
+        - Area_2_Reached
+        - Lamp_5_Open_For_10_Seconds
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Scenario Week_2_Task_14
+    goals:
+        - Checkpoint_1
+        - Checkpoint_2
+        - Checkpoint_3
+        - Checkpoint_4
+        - Checkpoint_5
+    concurrent: False
+end

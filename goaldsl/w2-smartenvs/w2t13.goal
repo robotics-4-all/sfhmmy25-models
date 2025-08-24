@@ -1,0 +1,137 @@
+Metadata
+    name: qFjyT
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "CONTACT_EMAIL_HERE"
+    description: "SFHMMY2025 - Week_2_Task_13"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity camera_1_detection
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.camera.camera_1.detection"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - detection: dict
+end
+
+Entity camera_2_detection
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.camera.camera_2.detection"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - detection: dict
+end
+
+Entity camera_3_detection
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.camera.camera_3.detection"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - detection: dict
+end
+
+Entity camera_4_detection
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.camera.camera_4.detection"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - detection: dict
+end
+
+Entity ze_human_pose
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.ze_human.pose"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity ze_human_properties
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.ze_human.properties"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - move: bool
+        - sound: bool
+        - lang: str
+        - range: float
+        - speech: str
+        - emotion: str
+        - gender: str
+        - age: float
+end
+
+
+Goal<EntityPyCondition> Camera1_Initial_Detection
+    condition:
+        "len(camera_1_detection.detection) > 0"
+end
+
+Goal<EntityStateChange> Camera1_Detection_Trigger
+    entity: camera_1_detection
+end
+
+Goal<EntityPyCondition> Atleast_One_Camera
+    condition:
+        "len(camera_1_detection.detection) > 0 or len(camera_2_detection.detection) > 0 or len(camera_3_detection.detection) > 0 or len(camera_4_detection.detection) > 0"
+end
+
+Goal<EntityPyCondition> Zero_Detections
+    condition:
+        "len(camera_1_detection.detection) == 0 and len(camera_2_detection.detection) == 0 and len(camera_3_detection.detection) == 0 and len(camera_4_detection.detection) == 0"
+end
+
+Goal<Complex> Out_Of_View
+    goals:
+        - Camera1_Detection_Trigger
+        - Zero_Detections
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+
+Scenario Week_2_Task_13
+    goals:
+        - Camera1_Initial_Detection
+    fatals:
+        - Out_Of_View
+    concurrent: False
+end
+

@@ -1,0 +1,119 @@
+Metadata
+    name: gPyPR
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: ""
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+// --------------------- ENTITIES ---------------------------------
+// ----------------------------------------------------------------
+
+Entity TemperatureSensor
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_37.data"
+    source: LocalRedis
+    freq: 10.0
+    attributes:
+        - value: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> Temperature_Below
+    condition:
+        "TemperatureSensor.value < 23.8"
+end
+
+Goal<EntityPyCondition> Temperature_Over
+    condition:
+        "TemperatureSensor.value > 23.8"
+end
+
+Goal<EntityPyCondition> Transitions_Counter
+    condition:
+        "AppVariables.name == 'threshold_counter' and AppVariables.value == 2"
+    timeConstraints:
+        - FROM_GOAL_START(<130)
+end
+
+Goal<EntityPyCondition> Fake_Delay  // NICE HACK WITH GOALDSL
+    condition:
+        "1==1"
+    timeConstraints:
+        - FOR_TIME(120)
+end
+
+Goal<EntityPyCondition> Transitions_Counter_Fail
+    condition:
+        "AppVariables.name == 'threshold_counter' and AppVariables.value > 2"
+    timeConstraints:
+        - FROM_GOAL_START(<130)
+end
+
+Goal<Complex> TemperatureTransition
+    goals:
+        - Temperature_Below
+        - Temperature_Over
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Repeater> Transitions_Repeater
+    goal: TemperatureTransition
+    times: 2
+end
+
+// ----------------------------------------------------------------
+
+Scenario Week_2_Task_6
+    goals:
+        - Transitions_Repeater
+        - Transitions_Counter
+        - Fake_Delay
+    fatals:
+        - Transitions_Counter_Fail
+    concurrent: True
+end

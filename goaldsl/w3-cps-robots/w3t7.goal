@@ -1,0 +1,265 @@
+Metadata
+    name: A8st3
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_temperature_75_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.sn_temperature_75.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity main_switch_2_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_2.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity main_switch_1_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_1.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity main_switch_0_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_0.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity ef_thermostat_76_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_76.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ef_thermostat_77_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_77.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ef_thermostat_78_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_78.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity gn_robot_79_pose
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_79.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity gn_robot_79_crash
+    type: sensor
+    uri: "streamsim.{UID}.gn_robot_79.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity main_switch_2_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_2.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity main_switch_1_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_1.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity main_switch_0_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.main_switch_0.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity ef_thermostat_76_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_76.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity ef_thermostat_77_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_77.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity ef_thermostat_78_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_78.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity gn_robot_79_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.gn_robot_79.actuator.motion.twist.gn_robot_79_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> Main_Switch_0_State_Off
+    condition:
+        "main_switch_0_set.state in ('off', 'Off', 'OFF')"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Main_Switch_1_State_Off
+    condition:
+        "main_switch_1_set.state in ('off', 'Off', 'OFF')"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Main_Switch_2_State_Off
+    condition:
+        "main_switch_2_set.state in ('off', 'Off', 'OFF')"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Overheat
+    condition:
+        "sn_temperature_75_data.value >= 65"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<CircularArea> Reached_Main_Switch_0
+    center: Point3D(2.61, 28.84, 0)
+    radius: 2
+    tag: ENTER
+end
+
+Goal<CircularArea> Reached_Main_Switch_1
+    center: Point3D(45.28, 19.43, 0)
+    radius: 2
+    tag: ENTER
+end
+
+Goal<CircularArea> Reached_Main_Switch_2
+    center: Point3D(44.82, 2.70, 0)
+    radius: 2
+    tag: ENTER
+end
+
+Goal<Complex> Main_Switch_0_Closed
+    goals:
+        - Reached_Main_Switch_0
+        - Main_Switch_0_State_Off
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Main_Switch_1_Closed
+    goals:
+        - Reached_Main_Switch_1
+        - Main_Switch_1_State_Off
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Main_Switch_2_Closed
+    goals:
+        - Reached_Main_Switch_2
+        - Main_Switch_2_State_Off
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityStateChange> Robot_Crash
+    entity: gn_robot_79_crash
+end
+
+// ----------------------------------------------------------------
+
+Scenario W3_T7
+    goals:
+        - Main_Switch_0_Closed
+        - Main_Switch_1_Closed
+        - Main_Switch_2_Closed
+    fatals:
+        - Robot_Crash
+        - Overheat
+    concurrent: True
+end

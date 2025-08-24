@@ -1,0 +1,135 @@
+Metadata
+    name: bSRWu
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity big_brother_camera_detection
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.camera.big_brother_camera.detection"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - detection: dict
+end
+
+Entity child_pose
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.child.pose"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity child_properties
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.child.properties"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - move: bool
+        - sound: bool
+        - lang: str
+        - range: float
+        - speech: str
+        - emotion: str
+        - gender: str
+        - age: float
+end
+
+Entity woman_pose
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.woman.pose"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity woman_properties
+    type: sensor
+    uri: "streamsim.{UID}.actor.human.woman.properties"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - move: bool
+        - sound: bool
+        - lang: str
+        - range: float
+        - speech: str
+        - emotion: str
+        - gender: str
+        - age: float
+end
+
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+// Goal<EntityStateChange> Angry_Human_Detected
+//     entity: big_brother_camera_detection
+// end
+
+Goal<EntityPyCondition> Angry_Human_Detected
+    condition:
+        "len(big_brother_camera_detection.detection) > 0 and big_brother_camera_detection.detection['emotion']['value'] == 'angry'"
+end
+
+Goal<EntityPyCondition> Human_Angle_Correct
+    condition:
+        "AppVariables.name == 'human' and (AppVariables.value > 6 and AppVariables.value < 7)"
+end
+
+Scenario Week_2_Task_12
+    goals:
+        - Angry_Human_Detected
+        - Human_Angle_Correct
+    concurrent: False
+end

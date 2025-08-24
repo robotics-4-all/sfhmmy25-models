@@ -1,0 +1,87 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Entity MySensorData
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.my_sensor.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Goal<EntityStateChange> MySensor_STCH
+    entity: MySensorData
+end
+
+Goal<EntityPyCondition> Double_Sensor_Data
+    condition:
+        "AppVariables.name == 'double_sensor_data' and round(AppVariables.value, 4) == round(2.0 * MySensorData.value, 4)"
+end
+
+Goal<Complex> DoubleValue_Check
+    goals:
+        - MySensor_STCH
+        - Double_Sensor_Data
+    strategy: ALL_ACCOMPLISHED_ORDERED
+    timeConstraints:
+        - FROM_GOAL_START(1)
+end
+
+Goal<Repeater> DoubleValue_x30
+    goal: DoubleValue_Check
+    times: 30
+end
+
+Scenario Week_2_Task_1
+    goals:
+        - DoubleValue_x30
+    concurrent: False
+end

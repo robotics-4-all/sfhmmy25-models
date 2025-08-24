@@ -1,0 +1,405 @@
+Metadata
+    name: vwKwA
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_areaAlarm_79_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_79.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_80_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_80.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_81_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_81.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_82_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_82.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_areaAlarm_83_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.area_alarm.sn_areaAlarm_83.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity fish_keypad_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.fish_keypad.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity cachier_keypad_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.cachier_keypad.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity office_keypad_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.office_keypad.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: str
+end
+
+Entity sarah_pose
+    type: sensor
+    uri: "streamsim.{UID}.sarah.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity sarah_crash
+    type: sensor
+    uri: "streamsim.{UID}.sarah.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity sarah_leds_get
+    type: sensor
+    uri: "streamsim.{UID}.sarah.actuator.visual.leds.sarah_leds.state"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity jessica_pose
+    type: sensor
+    uri: "streamsim.{UID}.jessica.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity jessica_crash
+    type: sensor
+    uri: "streamsim.{UID}.jessica.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity jessica_leds_get
+    type: sensor
+    uri: "streamsim.{UID}.jessica.actuator.visual.leds.jessica_leds.state"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity parker_pose
+    type: sensor
+    uri: "streamsim.{UID}.parker.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity parker_crash
+    type: sensor
+    uri: "streamsim.{UID}.parker.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity parker_leds_get
+    type: sensor
+    uri: "streamsim.{UID}.parker.actuator.visual.leds.parker_leds.state"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity fish_keypad_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.fish_keypad.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity cachier_keypad_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.cachier_keypad.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity office_keypad_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.office_keypad.set"
+    source: LocalRedis
+    attributes:
+        - state: str
+end
+
+Entity sarah_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.sarah.actuator.motion.twist.sarah_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity sarah_leds_set
+    type: actuator
+    uri: "streamsim.{UID}.sarah.actuator.visual.leds.sarah_leds.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity jessica_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.jessica.actuator.motion.twist.jessica_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity jessica_leds_set
+    type: actuator
+    uri: "streamsim.{UID}.jessica.actuator.visual.leds.jessica_leds.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity parker_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.parker.actuator.motion.twist.parker_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity parker_leds_set
+    type: actuator
+    uri: "streamsim.{UID}.parker.actuator.visual.leds.parker_leds.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: str
+        - r: float
+        - g: float
+        - b: float
+end
+
+
+Goal<EntityStateChange> Parker_Crash
+    entity: parker_crash
+end
+
+Goal<EntityStateChange> Jessica_Crash
+    entity: jessica_crash
+end
+
+Goal<EntityStateChange> Sarah_Crash
+    entity: sarah_crash
+end
+
+Goal<EntityPyCondition> AreaAlarm_Triggered
+    condition:
+        "len(sn_areaAlarm_79_data.value) > 0 or len(sn_areaAlarm_80_data.value) > 0 or len(sn_areaAlarm_81_data.value) > 0 or len(sn_areaAlarm_82_data.value) > 0 or len(sn_areaAlarm_83_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Timeout_5m
+    condition:
+        "1==1"
+    timeConstraints:
+        - FOR_TIME(300)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Office_Keypad_Set
+    condition:
+        "office_keypad_set.state == 'charlie'"
+    timeConstraints:
+        - FOR_TIME(0.1)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Cachier_Keypad_Set
+    condition:
+        "cachier_keypad_set.state == 'tango'"
+    timeConstraints:
+        - FOR_TIME(0.1)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Fish_Keypad_Set
+    condition:
+        "fish_keypad_set.state == 'nine'"
+    timeConstraints:
+        - FOR_TIME(0.1)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Set_Any_Keypad_Correct
+    condition:
+        "fish_keypad_set.state == 'nine' or cachier_keypad_set.state == 'tango' or office_keypad_set.state == 'charlie'"
+    timeConstraints:
+        - FOR_TIME(0.1)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Set_Keypads_Correct
+    condition:
+        "fish_keypad_set.state == 'nine' and cachier_keypad_set.state == 'tango' and office_keypad_set.state == 'charlie'"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+// Goal<Complex> Set_Any_Keypad_Correct
+//     goals:
+//         - Fish_Keypad_Set
+//         - Cachier_Keypad_Set
+//         - Office_Keypad_Set
+//     strategy: AT_LEAST_ONE_ACCOMPLISHED
+// end
+
+Goal<EntityPyCondition> Sync_Helper
+    condition:
+        "fish_keypad_set.state == 'nine' and cachier_keypad_set.state == 'tango' and office_keypad_set.state == 'charlie'"
+    // timeConstraints:
+    //     - FOR_TIME(0.1)  // Filter jitters
+    timeConstraints:
+        - FROM_GOAL_START(<1)
+end
+
+/*
+Goal<Complex> Sync_Helper
+    goals:
+        - Fish_Keypad_Set
+        - Office_Keypad_Set
+        - Cachier_Keypad_Set
+    strategy: ALL_ACCOMPLISHED_ORDERED
+    timeConstraints:
+        - FROM_GOAL_START(<1)
+end
+*/
+
+Goal<Complex> Set_Keypads_Synchronized
+    goals:
+        - Set_Any_Keypad_Correct
+        - Sync_Helper
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+
+// ----------------------------------------------------------------
+
+Scenario W3_T7
+    goals:
+        - Set_Any_Keypad_Correct -> 0.1
+        - Set_Keypads_Correct -> 0.2
+        - Set_Keypads_Synchronized -> 0.7
+    fatals:
+        - Parker_Crash
+        - Jessica_Crash
+        - Sarah_Crash
+        - AreaAlarm_Triggered
+        - Timeout_5m
+    concurrent: True
+end

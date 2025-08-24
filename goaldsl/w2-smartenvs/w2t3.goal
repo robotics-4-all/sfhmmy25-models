@@ -1,0 +1,179 @@
+Metadata
+    name: gSDrr
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity LightSensorData
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.visual.light_sensor.l_sensor.data"
+    source: LocalRedis
+    freq: 3.0
+    attributes:
+        - value: float
+end
+
+Entity light_2_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_2.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity light_3_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_3.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity light_1_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_1.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity light_2_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_2.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity light_3_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_3.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Entity light_1_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.visual.leds.light_1.set"
+    source: LocalRedis
+    attributes:
+        - luminosity: float
+        - r: float
+        - g: float
+        - b: float
+end
+
+Goal<EntityPyCondition> Luminosity_Below_30
+    condition:
+        "LightSensorData.value < 30"
+end
+
+Goal<EntityPyCondition> Luminosity_Over_70
+    condition:
+        "LightSensorData.value > 70"
+end
+
+Goal<EntityStateChange> Light1_SC
+    entity: light_1_set
+end
+
+Goal<EntityStateChange> Light2_SC
+    entity: light_2_set
+end
+
+Goal<EntityStateChange> Light3_SC
+    entity: light_3_set
+end
+
+Goal<EntityPyCondition> LightsClosed
+    condition:
+        "light_1_set.luminosity == 0 and light_2_set.luminosity == 0 and light_3_set.luminosity == 0"
+end
+
+Goal<EntityPyCondition> LightsOpen
+    condition:
+        "light_1_set.luminosity > 0 and light_2_set.luminosity > 0 and light_3_set.luminosity > 0"
+end
+
+Goal<Complex> Lights_SC
+    goals:
+        - Light1_SC
+        - Light2_SC
+        - Light3_SC
+    strategy: ALL_ACCOMPLISHED
+end
+
+Goal<Complex> CloseLights
+    goals:
+        - Luminosity_Over_70
+        - Lights_SC
+        - LightsClosed
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> OpenLights
+    goals:
+        - Luminosity_Below_30
+        - Lights_SC
+        - LightsOpen
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Scenario Week_2_Task_3
+    goals:
+        - CloseLights
+        - OpenLights
+    concurrent: True
+end

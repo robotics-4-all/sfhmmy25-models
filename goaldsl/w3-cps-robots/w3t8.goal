@@ -1,0 +1,214 @@
+Metadata
+    name: zqp5Y
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_linearAlarm_69_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearAlarm_69.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearAlarm_70_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearAlarm_70.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity mario_pose
+    type: sensor
+    uri: "streamsim.{UID}.mario.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity mario_crash
+    type: sensor
+    uri: "streamsim.{UID}.mario.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity mario_sonar_fl_data
+    type: sensor
+    uri: "streamsim.{UID}.mario.sensor.distance.sonar.mario_sonar_fl.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - distance: float
+end
+
+Entity mario_sonar_f_data
+    type: sensor
+    uri: "streamsim.{UID}.mario.sensor.distance.sonar.mario_sonar_f.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - distance: float
+end
+
+Entity mario_sonar_fr_data
+    type: sensor
+    uri: "streamsim.{UID}.mario.sensor.distance.sonar.mario_sonar_fr.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - distance: float
+end
+
+Entity mario_sonar_l_data
+    type: sensor
+    uri: "streamsim.{UID}.mario.sensor.distance.sonar.mario_sonar_l.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - distance: float
+end
+
+Entity mario_sonar_r_data
+    type: sensor
+    uri: "streamsim.{UID}.mario.sensor.distance.sonar.mario_sonar_r.data"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - distance: float
+end
+
+Entity mario_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.mario.actuator.motion.twist.mario_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> Checkpoint_A
+    condition:
+        "len(sn_linearAlarm_69_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.2)  // Filter jitters
+end
+
+Goal<EntityPyCondition> Checkpoint_B
+    condition:
+        "len(sn_linearAlarm_70_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.2)  // Filter jitters
+end
+
+// Goal<CircularArea> Start_Finish_Point
+//     center: Point3D(24, 13, 0)
+//     radius: 1
+//     tag: ENTER
+// end
+
+Goal<RectangleArea> Start_Finish_Point
+    bottomLeftEdge: Point3D(23.39, 11.29, 0)
+    lengthX: 1
+    lengthY: 4
+    tag: ENTER
+end
+
+Goal<Complex> Do_Lap
+    goals:
+        - Checkpoint_A
+        - Checkpoint_B
+        - Start_Finish_Point
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Do_Lap_1
+    goals:
+        - Checkpoint_A
+        - Checkpoint_B
+        - Start_Finish_Point
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<Complex> Do_Lap_2
+    goals:
+        - Checkpoint_A
+        - Checkpoint_B
+        - Start_Finish_Point
+    strategy: ALL_ACCOMPLISHED_ORDERED
+end
+
+Goal<EntityStateChange> Mario_Crash
+    entity: mario_crash
+end
+
+Goal<Repeater> Lap_Repeat_x2
+    goal: Do_Lap
+    times: 2
+    timeConstraints:
+        - FROM_GOAL_START(300)
+end
+
+Goal<EntityPyCondition> Timeout_300_Seconds
+    condition:
+        "1==1"
+    timeConstraints:
+        - FOR_TIME(300)  // Filter jitters
+end
+
+// ----------------------------------------------------------------
+
+Scenario W3_T8
+    goals:
+        - Do_Lap_1
+        - Do_Lap_2
+    fatals:
+        - Mario_Crash
+        - Timeout_300_Seconds
+    concurrent: False
+end

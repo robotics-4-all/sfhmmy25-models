@@ -1,0 +1,66 @@
+Metadata
+    name: bN7dq
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity keypad_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.keypad.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: int
+end
+
+Entity keypad_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.switch.relay.keypad.set"
+    source: LocalRedis
+    attributes:
+        - state: int
+end
+
+Goal<EntityAttrStream> Password_Correct
+    stream: keypad_set.state: [2, 9, 7, 5]
+    strategy: ALL_ORDERED
+end
+
+Scenario Week_2_Task_7
+    goals:
+        - Password_Correct
+    concurrent: False
+end

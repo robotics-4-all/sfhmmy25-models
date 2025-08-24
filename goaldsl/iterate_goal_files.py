@@ -71,7 +71,6 @@ def process_goal_file(file_path):
     model = build_model(file_path)
     entities = model.entities
     goals = model.goals
-    print(model)
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:

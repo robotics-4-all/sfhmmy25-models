@@ -1,0 +1,197 @@
+Metadata
+    name: fWCNs
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_linearalarm_55_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_55.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_56_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_56.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_57_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_57.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_58_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_58.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_59_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_59.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_60_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_60.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity sn_linearalarm_61_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_61.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity bonnie_pose
+    type: sensor
+    uri: "streamsim.{UID}.bonnie.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity bonnie_crash
+    type: sensor
+    uri: "streamsim.{UID}.bonnie.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity clyde_pose
+    type: sensor
+    uri: "streamsim.{UID}.clyde.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity clyde_crash
+    type: sensor
+    uri: "streamsim.{UID}.clyde.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity bonnie_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.bonnie.actuator.motion.twist.bonnie_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity clyde_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.clyde.actuator.motion.twist.clyde_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Goal<EntityPyCondition> AreaAlarm_Triggered
+    condition:
+        "len(sn_linearalarm_55_data.value) > 0 or len(sn_linearalarm_56_data.value) > 0 or len(sn_linearalarm_57_data.value) > 0 or len(sn_linearalarm_58_data.value) > 0 or len(sn_linearalarm_59_data.value) > 0 or len(sn_linearalarm_60_data.value) > 0 or len(sn_linearalarm_60_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.5)  // Filter jitters
+end
+
+Goal<EntityStateChange> Clyde_Crash
+    entity: clyde_crash
+end
+
+Goal<EntityStateChange> Bonnie_Crash
+    entity: bonnie_crash
+end
+
+Goal<WaypointTrajectory> Clyde_Waypoints
+    entity: clyde_pose
+    points: [Point3D(59.5, 39.67, 0), Point3D(59.5, 49.3, 0)]
+    maxDeviation: 0.5
+end
+
+Goal<WaypointTrajectory> Bonnie_Waypoints
+    entity: bonnie_pose
+    points: [Point3D(59.5, 39.67, 0), Point3D(59.5, 49.3, 0)]
+    maxDeviation: 0.5
+end
+
+Scenario W3_T3
+    goals:
+        - Clyde_Waypoints
+        - Bonnie_Waypoints
+    fatals:
+        - AreaAlarm_Triggered
+        - Clyde_Crash
+        - Bonnie_Crash
+    concurrent: True
+end

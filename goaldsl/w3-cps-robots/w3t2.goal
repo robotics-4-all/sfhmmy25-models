@@ -1,0 +1,185 @@
+Metadata
+    name: BlByt
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity sn_linearalarm_188_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_188.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_189_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_189.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_193_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_193.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_194_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_194.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_195_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_195.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_196_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_196.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_198_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_198.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity sn_linearalarm_201_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.alarm.linear_alarm.sn_linearalarm_201.data"
+    source: LocalRedis
+    freq: 0.5
+    attributes:
+        - value: list
+end
+
+Entity minime_pose
+    type: sensor
+    uri: "streamsim.{UID}.minime.pose"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity minime_crash
+    type: sensor
+    uri: "streamsim.{UID}.minime.crash"
+    source: LocalRedis
+    freq: -1.0
+    attributes:
+        - position: dict
+        - orientation: dict
+end
+
+Entity minime_motion_set
+    type: actuator
+    uri: "streamsim.{UID}.minime.actuator.motion.twist.minime_skid_steer.set"
+    source: LocalRedis
+    attributes:
+        - linear: float
+        - angular: float
+end
+
+Entity minime_poi_command
+    type: sensor
+    uri: "streamsim.{UID}.minime.move.poi"
+    source: LocalRedis
+    attributes:
+        - poi: str
+        - linear: float
+        - angular: float
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> LinearAlarm_Triggered
+    condition:
+        "len(sn_linearalarm_188_data.value) > 0 or len(sn_linearalarm_189_data.value) > 0 or len(sn_linearalarm_193_data.value) > 0 or len(sn_linearalarm_194_data.value) > 0 or len(sn_linearalarm_195_data.value) > 0 or len(sn_linearalarm_196_data.value) > 0 or len(sn_linearalarm_198_data.value) > 0 or len(sn_linearalarm_201_data.value) > 0"
+    timeConstraints:
+        - FOR_TIME(0.1)  // Filter jitters
+end
+
+Goal<EntityStateChange> Minime_Crash
+    entity: minime_crash
+end
+
+Goal<Position> Reach_Mall
+    entity: minime_pose
+    position: Point3D(93.71, 5.59, 0)
+    maxDeviation: 1
+end
+
+Goal<EntityStateChange> Uses_GotoPoi_Command
+    entity: minime_poi_command
+end
+
+// ----------------------------------------------------------------
+
+Scenario W3_T2
+    goals:
+        - Reach_Mall
+    fatals:
+        - LinearAlarm_Triggered
+        - Minime_Crash
+        - Uses_GotoPoi_Command
+    concurrent: True
+end

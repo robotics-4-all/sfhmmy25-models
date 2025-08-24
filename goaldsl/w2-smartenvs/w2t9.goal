@@ -1,0 +1,67 @@
+Metadata
+    name: YWdAS
+    version: "0.1.0"
+    author: "klpanagi"
+    email: "klpanagi@ece.auth.gr"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Humans
+    condition:
+        "AppVariables.name == 'humans' and AppVariables.value == 2"
+end
+
+Goal<EntityPyCondition> Happy_Humans
+    condition:
+        "AppVariables.name == 'happy' and AppVariables.value == 1"
+end
+
+
+Scenario Week_2_Task_9
+    goals:
+        - Humans
+        - Happy_Humans
+    concurrent: True
+end

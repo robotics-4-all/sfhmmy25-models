@@ -1,0 +1,145 @@
+Metadata
+    name: o8LDW
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "BRIEF_DESCRIPTION"
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity upper_temperature_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.upper_temperature.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity bedroom_temperature_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.bedroom_temperature.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity bathroom_humidity_data
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.humidity.bathroom_humidity.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity ef_thermostat_40_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_40.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ef_humidifier_41_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_humidifier_41.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ef_thermostat_40_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_thermostat_40.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity ef_humidifier_41_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ef_humidifier_41.set"
+    source: LocalRedis
+    attributes:
+        - humidity: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+Goal<EntityPyCondition> Temperature_Over_27
+    condition:
+        "upper_temperature_data.value > 27 or bedroom_temperature_data.value > 27"
+end
+
+Goal<EntityPyCondition> Humidity_Over_80_PCT
+    condition:
+        "bathroom_humidity_data.value > 80"
+end
+
+Goal<EntityPyCondition> Single_Condition
+    condition:
+        "(upper_temperature_data.value > 27 or bedroom_temperature_data.value > 27) and bathroom_humidity_data.value > 80"
+end
+
+Goal<EntityPyCondition> Alert
+    condition:
+        "AppVariables.name == 'alert' and AppVariables.value == 1"
+end
+
+Goal<Complex> Target_Reached
+    goals:
+        - Single_Condition
+        - Alert
+    strategy: ALL_ACCOMPLISHED_ORDERED
+    timeConstraints:
+        - FROM_GOAL_START(<30)
+end
+
+Scenario Week_2_Task_4
+    goals:
+        - Target_Reached
+    concurrent: False
+end

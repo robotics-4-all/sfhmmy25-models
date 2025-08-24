@@ -1,0 +1,108 @@
+Metadata
+    name: x13Dq
+    version: "0.1.0"
+    author: "AUTHOR_NAME_HERE"
+    email: "CONTACT_EMAIL_HERE"
+    description: "Διαθέτουμε ένα σπίτι με ανοιχτά παράθυρα, στο εξωτερικό του οποίου μεταβάλλεται αυτόματα η θερμοκρασία περιβάλλοντος. Το σπίτι διαθέτει δύο air-condition και έναν αισθητήρα θερμοκρασίας σε ένα σημείο ενδιαφέροντος. Καλείστε να υλοποιήσετε έναν ελεγκτή, ο οποίος θα μεταβάλλει τις τιμές των air-conditions ώστε η θερμοκρασία στο σημείο ενδιαφέροντος να παραμένει σταθερή και ίση με 22.5 (+- 0.5 βαθμούς) για 20 δευτερόλεπτα."
+end
+
+Broker<MQTT> LocsysMQTT
+    host: 'locsys.issel.ee.auth.gr'
+    port: 8883
+    ssl: true
+    auth:
+        username: '*****'
+        password: '*****'
+end
+
+Broker<MQTT> LocalMQTT
+    host: 'localhost'
+    port: 1883
+    auth:
+        username: ''
+        password: ''
+end
+
+Broker<Redis> LocalRedis
+    host: 'localhost'
+    port: 6379
+    auth:
+        username: ''
+        password: ''
+end
+
+RTMonitor
+    broker: LocalRedis
+    eventTopic: "goaldsl.{U_ID}.event"
+    logsTopic: "goaldsl.{U_ID}.log"
+end
+
+Entity TemperatureSensor
+    type: sensor
+    uri: "streamsim.{UID}.world.world.sensor.env.temperature.temp_sensor.data"
+    source: LocalRedis
+    freq: 1.0
+    attributes:
+        - value: float
+end
+
+Entity ac_living_room_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ac_living_room.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ac_dining_room_state
+    type: sensor
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ac_dining_room.state"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - state: float
+end
+
+Entity ac_living_room_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ac_living_room.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity ac_dining_room_set
+    type: actuator
+    uri: "streamsim.{UID}.world.world.actuator.env.thermostat.ac_dining_room.set"
+    source: LocalRedis
+    attributes:
+        - temperature: float
+end
+
+Entity AppVariables
+    type: sensor
+    uri: "appcreator.variables"
+    source: LocalRedis
+    freq: -1
+    attributes:
+        - name: str
+        - value: str
+        - type: str
+end
+
+// ------------------- GOALS --------------------------------------
+// ----------------------------------------------------------------
+
+Goal<EntityPyCondition> Temperature_Steady_Window
+    condition:
+        "TemperatureSensor.value >= 22 and TemperatureSensor.value <= 23"
+    timeConstraints:
+        - FOR_TIME(20)
+end
+
+Scenario Week_2_Task_11
+    goals:
+        - Temperature_Steady_Window
+    concurrent: False
+end
